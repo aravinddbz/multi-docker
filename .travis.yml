@@ -1,0 +1,21 @@
+sudo : required
+services:
+  - docker
+
+before_install:
+  - docker build  -t aravinddbz/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run aravinddbz/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t aravinddbz/multi-client ./client
+  - docker build -t aravinddbz/multi-nginx ./nginx
+  - docker build -t aravinddbz/multi-server ./server
+  - docker build -t aravinddbz/multi-worker ./worker
+  #Log in to docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push aravinddbz/multi-client
+  - docker push aravinddbz/multi-nginx
+  - docker push aravinddbz/multi-server
+  - docker push aravinddbz/multi-worker
